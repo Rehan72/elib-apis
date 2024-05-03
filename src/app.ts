@@ -5,6 +5,7 @@ import globalErrorHandler from "./middlewares/globalErrorhandler";
 import userRouter from "./user/userRouter";
 
 const app = express()
+app.use(express.json());
 // Route configuration
 // http methods: "GET", "POST", "PUT", "DELETE"
 app.get('/',(req, res,next) => {
