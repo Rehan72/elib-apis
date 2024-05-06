@@ -30,15 +30,27 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
   }
 
   // Password hash
-  const hashedPassword = await bcrypt.hash(password, 10);
+//   const hashedPassword = await bcrypt.hash(password, 10);
 
-  let newUser: User;
-  try {
-    newUser = await userModel.create({ name, email, hashedPassword });
-  } catch (err) {
-    return next(createHttpError(500, "Error while creating user"));
-  }
+//   let newUser: User;
+ 
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Create a new user document
+    const newUser = new userModel({
+        name,
+        email,
+        password: hashedPassword // Save the hashed password
+    });
+    try {
+    // Save the new user document to the database
+    await newUser.save();
+
+    console.log("User created successfully");
+} catch (error) {
+    console.error("Error creating user:", error);
+}
   try {
     // Token generation JWT
 
@@ -46,10 +58,48 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
       expiresIn: "7d",
     });
 
-    res.json({ accessToken: token });
+    res.status(201).json({ accessToken: token });
   } catch (err) {
     return next(createHttpError(500, "Error while signing the jwt token"));
   }
 };
 
-export { createUser };
+const loginUser = async (req: Request, res: Response, next: NextFunction) => {
+    const { email, password } = req.body;
+    console.log(req.body,"req.body");
+    
+    if (!email || !password) {
+        return next(createHttpError(400, "Email and password are required"));
+    }
+
+    try {
+        const user = await userModel.findOne({ email });
+        console.log(user,"user");
+        
+        if (!user) {
+            return next(createHttpError(404, "User not found"));
+        }
+
+        //Check if the user document contains the password field
+        if (!user.password) {
+            return next(createHttpError(400, "Password field missing in user document"));
+        }
+
+        // Compare passwords
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return next(createHttpError(400, "Invalid password"));
+        }
+
+        // Create access token
+        const token = sign({ sub: user._id }, config.jwtSecret as string, {
+            expiresIn: "7d",
+        });
+        res.json({ accessToken: token });
+    } catch (error) {
+        console.error("Error during login:", error);
+        return next(createHttpError(500, "Internal server error"));
+    }
+};
+
+export { createUser,loginUser };
