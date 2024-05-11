@@ -182,6 +182,21 @@ const bookList=async(req: Request, res: Response, next: NextFunction)=>{
 }
 
 
+const getListByBookId=async(req: Request, res: Response, next: NextFunction)=>{
+    const bookId= req.params.bookId;
+    try{
+      const book= await bookModel.findOne({_id: bookId}); 
+       if(!book){
+        return next(createHttpError(404, "book not found"))
+       }
+
+       res.json({book,message:"getting  book List"}) 
+    }catch(err){
+        return next(createHttpError(500,"Error while getting book list  "))
+    }
+ 
+}
+
 // const updateBook = async (req: Request, res: Response, next: NextFunction) => {
 //   const { title, genre } = req.body;
 //   const bookId = req.params.bookId;
@@ -276,4 +291,4 @@ const bookList=async(req: Request, res: Response, next: NextFunction)=>{
 // }
 // };
 
-export { createBook, updateBook,bookList };
+export { createBook, updateBook,bookList,getListByBookId };
