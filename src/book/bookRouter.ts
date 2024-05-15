@@ -1,5 +1,5 @@
 import express from 'express';
-import { bookList, createBook, updateBook ,getListByBookId,deleteBook} from './bookController';
+import { bookList, createBook, updateBook ,getListByBookId,deleteBook, likeBook, getLikesCount} from './bookController';
 import multer from 'multer';
 import path from 'node:path'
 import authenticate from '../middlewares/authenticate';
@@ -27,4 +27,13 @@ bookRouter.get("/",bookList)
 bookRouter.get("/:bookId",getListByBookId)
 
 bookRouter.delete("/:bookId",authenticate,deleteBook)
+
+
+// Like a book
+bookRouter.post('/:bookId/like', likeBook);
+
+// Get number of likes for a book
+bookRouter.get('/:bookId/likes', getLikesCount);
+
+
 export default bookRouter;

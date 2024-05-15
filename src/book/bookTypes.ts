@@ -7,6 +7,8 @@ export interface Book {
     genre: string;
     coverImage: string;
     file: string;
+    likesCount: { type: Number, default: 0 }
+    like:string;
     createdAt:Date;
     updateAt:Date;
 
